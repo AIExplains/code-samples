@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Snake Game</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
+    const snake = [{ x: 10, y: 10 }];
+    let food = { x: 15, y: 15 };
+    let xVelocity = 0;
+    let yVelocity = 0;
+    let score = 0;
+
+    function draw() {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw snake
+      ctx.fillStyle = 'green';
+      snake.forEach(segment => {
+        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+      });
+
+      // Draw food
+      ctx.fillStyle = 'red';
+      ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+
+      // Draw score
+      ctx.fillStyle = 'black';
+      ctx.fillText(`Score: ${score}`, 10, 20);
+    }
+
+    function update() {
+      const head = { x: snake[0].x + xVelocity, y: snake[0].y + yVelocity };
+
+      // Check if snake eats food
+      if (head.x === food.x && head.y === food.y) {
+        score++;
+        food = {
+          x: Math.floor(Math.random() * tileCount),
+          y: Math.floor(Math.random() * tileCount)
+        };
+      } else {
+        snake.pop();
+      }
+
+      // Game over conditions
+      if (
+        head.x < 0 || head.x >= tileCount ||
+        head.y < 0 || head.y >= tileCount ||
+        snake.some(segment => segment.x === head.x && segment.y === head.y)
+      ) {
+        clearInterval(gameLoop);
+        alert(`Game Over! Score: ${score}`);
+        location.reload(); // Restart the game
+      }
+
+      snake.unshift(head);
+    }
+
+    function gameLoop() {
+      draw();
+      update();
+    }
+
+    document.addEventListener('keydown', e => {
+      switch (e.key) {
+        case 'ArrowUp':
+          if (yVelocity === 0) {
+            xVelocity = 0;
+            yVelocity = -1;
+          }
+          break;
+        case 'ArrowDown':
+          if (yVelocity === 0) {
+            xVelocity = 0;
+            yVelocity = 1;
+          }
+          break;
+        case 'ArrowLeft':
+          if (xVelocity === 0) {
+            xVelocity = -1;
+            yVelocity = 0;
+          }
+          break;
+        case 'ArrowRight':
+          if (xVelocity === 0) {
+            xVelocity = 1;
+            yVelocity = 0;
+          }
+          break;
+      }
+    });
+
+    const gameInterval = 100; // milliseconds
+    const intervalId = setInterval(gameLoop, gameInterval);
+  </script>
+</body>
+</html>
